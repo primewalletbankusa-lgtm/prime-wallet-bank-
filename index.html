@@ -140,15 +140,15 @@
     <div id="regStep2" class="hidden">
       <h3 style="color:var(--nav-text);margin-bottom:16px">📍 Location Details</h3>
       <label>Country of Residence <span>*</span></label>
-      <select id="regCountry" onchange="loadStates()">
+      <select id="regCountry" onchange="loadStates()"required>
         <option value="">Select Country</option>
       </select>
       <label>State / Province <span>*</span></label>
-      <select id="regState" onchange="loadCities()">
+      <select id="regState" onchange="loadCities()"required>
         <option value="">Select State</option>
       </select>
       <label>City / Province <span>*</span></label>
-      <select id="regCity" onchange="load Towns()">
+      <select id="regCity" onchange="load Towns()"required>
         <option value="">Select City</option>
       </select>
       <label>Full Residential Address <span>*</span></label>
@@ -372,27 +372,45 @@ async function submitRegistration() {
 
 // --- 🔐 AUTH ---
 async function login() {
-  const email = document.getElementById("loginEmail").value;
+  const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPass").value;
-  
-  // Simulate login — replace with real API call
-  if (email && password.length >= 6) {
-    token = "demo_token_" + Date.now();
-    localStorage.setItem("pw_token", token);
-    currentUser = {
-      full_name: "William Kevin",
-      account_number: "2024567890",
-      balance: 0.00,
-      card_approved: false,
-      pin_set: false
-    };
-    hasApprovedCard = currentUser.card_approved;
-    loadDashboardData();
-    showPage("dashboardPage");
-  } else {
-    alert("Please enter valid email and password.");
+
+  if (!email || !password) return alert("⚠️ Fill email & password.");
+  if (!email.includes("@")) return alert("⚠️ Enter a valid email.");
+  if (password.length < 6) return alert("⚠️ Min 6 characters.");
+
+  try {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.token) {
+      token = data.token;
+      localStorage.setItem("pw_token", token);
+      currentUser = data.user;
+      hasApprovedCard = data.user?.card_approved || false;
+      pinVerified = data.user?.pin_set || false;
+      loadDashboardData();
+      showPage("dashboardPage");
+    } else {
+      alert("❌ Incorrect email or password.");
+    }
+  } catch {
+    // Demo mode — ONLY these work!
+    if (email === "demo@primewalletbank.us" && password === "Demo123!") {
+      token = "demo_token_" + Date.now();
+      localStorage.setItem("pw_token", token);
+      currentUser = { full_name: "William Kevin", balance: 1000, card_approved: false, pin_set: false };
+      loadDashboardData();
+      showPage("dashboardPage");
+    } else {
+      alert("❌ Wrong! Demo only:\n📧 demo@primewalletbank.us\n🔑 Demo123!");
+    }
   }
 }
+  
 
 function logout() {
   localStorage.removeItem("pw_token");
