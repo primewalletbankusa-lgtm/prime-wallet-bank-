@@ -370,23 +370,36 @@ async function submitRegistration() {
   showPage("loginPage");
 }
 
-// --- 🔐 AUTH ---
+// --- 🔐 AUTH — LOGIN (Works with registered email + password) ---
 async function login() {
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPass").value;
 
-  if (!email || !password) return alert("⚠️ Fill email & password.");
-  if (!email.includes("@")) return alert("⚠️ Enter a valid email.");
-  if (password.length < 6) return alert("⚠️ Min 6 characters.");
+  // ⛔ BLOCK EMPTY/INVALID INPUT — NEVER OPEN DASHBOARD!
+  if (!email || !password) {
+    alert("⚠️ Please enter your email and password.");
+    return; // STOP — don't proceed!
+  }
+  if (!email.includes("@")) {
+    alert("⚠️ Please enter a valid email address.");
+    return;
+  }
+  if (password.length < 6) {
+    alert("⚠️ Password must be at least 6 characters.");
+    return;
+  }
 
   try {
+    // 🔄 CHECK AGAINST BACKEND — matches what user registered with!
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
+
     if (data.token) {
+      // ✅ CORRECT — email + password match! OPEN DASHBOARD!
       token = data.token;
       localStorage.setItem("pw_token", token);
       currentUser = data.user;
@@ -395,21 +408,32 @@ async function login() {
       loadDashboardData();
       showPage("dashboardPage");
     } else {
-      alert("❌ Incorrect email or password.");
+      // ❌ WRONG — tell user!
+      alert("❌ Incorrect email or password.\n\nUse the email & password you registered with.");
     }
-  } catch {
-    // Demo mode — ONLY these work!
-    if (email ===" && password ===") {
+  } catch (err) {
+    // ⚠️ Backend offline — Demo mode ONLY
+    // Replace with YOUR test account if needed
+    if (email === "demo@primewalletbank.us" && password === "Demo123!") {
       token = "demo_token_" + Date.now();
       localStorage.setItem("pw_token", token);
-      currentUser = { full_name: "William Kevin", balance: 0.00, card_approved: false, pin_set: false };
+      currentUser = { 
+        full_name: "William Kevin", 
+        email: email,
+        balance: 0.00, 
+        card_approved: false, 
+        pin_set: false 
+      };
+      hasApprovedCard = false;
+      pinVerified = false;
       loadDashboardData();
       showPage("dashboardPage");
-
+    } else {
+      alert("❌ Email or password does not match.\n\nUse the same details you used during registration.");
     }
   }
 }
-  
+
 
 function logout() {
   localStorage.removeItem("pw_token");
