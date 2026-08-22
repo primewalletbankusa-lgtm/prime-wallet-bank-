@@ -148,7 +148,7 @@
         <option value="">Select State</option>
       </select>
       <label>City / Province <span>*</span></label>
-      <select id="regCity" onchange="load Towns()"required>
+      <select id="regCity" onchange="loadTowns()"required>
         <option value="">Select City</option>
       </select>
       <label>Full Residential Address <span>*</span></label>
@@ -300,51 +300,16 @@ function handleHeaderAuth() {
   if (token) logout();
   else showPage('loginPage');
 }
-
-// --- 🌍 FULL COUNTRY / BANKS DATABASE ---
-const countries = [
-  {id:1,name:"United States",code:"US",flag:"🇺🇸"},
-  {id:2,name:"United Kingdom",code:"GB",flag:"🇬🇧"},
-  {id:3,name:"Canada",code:"CA",flag:"🇨🇦"},
-  {id:4,name:"Nigeria",code:"NG",flag:"🇳🇬"},
-  {id:5,name:"Germany",code:"DE",flag:"🇩🇪"},
-  {id:6,name:"France",code:"FR",flag:"🇫🇷"},
-  {id:7,name:"Australia",code:"AU",flag:"🇦🇺"},
-  {id:8,name:"Japan",code:"JP",flag:"🇯🇵"},
-  {id:9,name:"India",code:"IN",flag:"🇮🇳"},
-  {id:10,name:"Brazil",code:"BR",flag:"🇧🇷"},
-  {id:11,name:"Mexico",code:"MX",flag:"🇲🇽"},
-  {id:12,name:"South Africa",code:"ZA",flag:"🇿🇦"},
-  {id:13,name:"China",code:"CN",flag:"🇨🇳"},
-  {id:14,name:"Italy",code:"IT",flag:"🇮🇹"},
-  {id:15,name:"Spain",code:"ES",flag:"🇪🇸"},
-  {id:16,name:"Netherlands",code:"NL",flag:"🇳🇱"},
-  {id:17,name:"Sweden",code:"SE",flag:"🇸🇪"},
-  {id:18,name:"Switzerland",code:"CH",flag:"🇨🇭"},
-  {id:19,name:"United Arab Emirates",code:"AE",flag:"🇦🇪"},
-  {id:20,name:"Singapore",code:"SG",flag:"🇸🇬"}
-];
-
-const banks = {
-  US: [
-    {code:"PWUS6XXX",name:"Prime Wallet Bank - USA",isPrime:true},
-    {code:"021000021",name:"JPMorgan Chase Bank"},
-    {code:"026009593",name:"Bank of America"},
-    {code:"121000248",name:"Wells Fargo Bank"},
-    {code:"071000013",name:"Citibank"}
-  ],
-  GB: [
-    {code:"PWGB2XXX",name:"Prime Wallet Bank - UK",isPrime:true},
-    {code:"BARCGB22",name:"Barclays Bank"},
-    {code:"NWBKGB2L",name:"NatWest Bank"},
-    {code:"LOYDGB22",name:"Lloyds Bank"}
-  ],
-  NG: [
-    {code:"PWNG1XXX",name:"Prime Wallet Bank - Nigeria",isPrime:true},
-    {code:"FBLLNGLA",name:"First Bank of Nigeria"},
-    {code:"GTBINGLA",name:"Guaranty Trust Bank"}
-  ]
-};
+  
+  // --- 📄 FILE UPLOAD HELPER — CONVERT IMAGES FOR ADMIN ---
+function fileToDataUrl(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+}
+  
 
 // ==============================================
 // 🌍 COUNTRY → STATE → CITY — FULL WORKING CODE
@@ -495,7 +460,20 @@ function setRegStep(n) {
   document.getElementById(`regStep${n}`).classList.remove('hidden');
 }
 
-async function submitRegistration() {
+async function submitRegistration() {async function submitRegistration() {
+  // ... all registration code ...
+  
+  // ✅ Save user & send to admin
+  localStorage.setItem("registered_user", JSON.stringify({...}));
+  alert("✅ Registration submitted!");
+  showPage("loginPage");
+} // ✅ CLOSE REGISTRATION HERE — IMPORTANT!
+
+// ✅ LOGIN FUNCTION — SEPARATE, NOT INSIDE!
+async function login() {
+  // ... login code here ...
+  }
+                                     
   if (document.getElementById("regPass").value !== document.getElementById("regConfirmPass").value)
     return alert("Passwords do not match!");
   
@@ -546,6 +524,7 @@ async function login() {
     alert("⚠️ Password must be at least 6 characters.");
     return;
   }
+  
 // ==============================================
 // 🔄 SEND NEW USER TO ADMIN PANEL FOR APPROVAL
 // ==============================================
@@ -579,7 +558,20 @@ localStorage.setItem("registered_user", JSON.stringify({
   country: country,
   approved: false
 }));
+async function submitRegistration() {
+  // ... all registration code ...
+  
+  // ✅ Save user & send to admin
+  localStorage.setItem("registered_user", JSON.stringify({...}));
+  alert("✅ Registration submitted!");
+  showPage("loginPage");
+} // ✅ CLOSE REGISTRATION HERE — IMPORTANT!
 
+// ✅ LOGIN FUNCTION — SEPARATE, NOT INSIDE!
+async function login() {
+  // ... login code here ...
+    }
+  
   try {
     // 🔄 CHECK AGAINST BACKEND — matches what user registered with!
     const res = await fetch(`${API_URL}/auth/login`, {
