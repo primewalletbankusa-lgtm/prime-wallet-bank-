@@ -346,14 +346,147 @@ const banks = {
   ]
 };
 
+// ==============================================
+// 🌍 COUNTRY → STATE → CITY — FULL WORKING CODE
+// ==============================================
 function loadCountries() {
   const sel = document.getElementById("regCountry");
-  sel.innerHTML = `<option value="">Select Country</option>`;
-  countries.forEach(c => sel.innerHTML += `<option value="${c.code}">${c.flag} ${c.name}</option>`);
+  sel.innerHTML = '<option value="">Select Country</option>';
+  countries.forEach(c => sel.innerHTML += `<option value="${c.code}">${c.name} ${c.flag}</option>`);
 }
 
-function loadStates() { /* Dynamic state loading */ }
-function loadCities() { /* Dynamic city loading */ }
+// --- 🌍 LOAD ALL COUNTRIES (already working — keep as is!) ---
+  const sel = document.getElementById("regCountry");
+  sel.innerHTML = '<option value="">Select Country</option>';
+  countries.forEach(c => sel.innerHTML += `<option value="${c.code}">${c.name} ${c.flag}</option>`);
+}
+
+// --- 🇺🇸 LOAD STATES BASED ON SELECTED COUNTRY ---
+function loadStates() {
+  const countryCode = document.getElementById("regCountry").value;
+  const stateSel = document.getElementById("regState");
+  const citySel = document.getElementById("regCity");
+  
+  // Reset city first
+  citySel.innerHTML = '<option value="">Select City First</option>';
+  citySel.disabled = true;
+  
+  if (!countryCode) {
+    stateSel.innerHTML = '<option value="">Select Country First</option>';
+    stateSel.disabled = true;
+    return;
+  }
+  
+  stateSel.disabled = false;
+  stateSel.innerHTML = '<option value="">Select State / Province</option>';
+  
+  // 📋 STATES DATABASE — Add more countries as needed!
+  const states = {
+    US: [
+      "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware",
+      "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+      "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana",
+      "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota",
+      "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+      "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
+      "District of Columbia"
+    ],
+    NG: [
+      "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River",
+      "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina",
+      "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau",
+      "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara", "FCT Abuja"
+    ],
+    GB: [
+      "England", "Scotland", "Wales", "Northern Ireland", "London"
+    ],
+    CA: [
+      "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Nova Scotia",
+      "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan"
+    ]
+  };
+  
+  // Load states for selected country
+  const countryStates = states[countryCode] || ["Other / Not Listed"];
+  countryStates.forEach(s => stateSel.innerHTML += `<option value="${s}">${s}</option>`);
+  
+  // Auto-load cities if country changes
+  loadCities();
+}
+
+// --- 🏙️ LOAD CITIES BASED ON SELECTED STATE ---
+function loadCities() {
+  const countryCode = document.getElementById("regCountry").value;
+  const state = document.getElementById("regState").value;
+  const citySel = document.getElementById("regCity");
+  
+  if (!state) {
+    citySel.innerHTML = '<option value="">Select State First</option>';
+    citySel.disabled = true;
+    return;
+  }
+  
+  citySel.disabled = false;
+  citySel.innerHTML = '<option value="">Select City</option>';
+  
+  // 📋 CITIES DATABASE — Matches States above!
+  const cities = {
+    US: {
+      "California": ["Los Angeles", "San Francisco", "San Diego", "San Jose", "Sacramento", "Fresno", "Oakland"],
+      "New York": ["New York City", "Buffalo", "Rochester", "Albany", "Syracuse"],
+      "Texas": ["Houston", "Dallas", "Austin", "San Antonio", "Fort Worth", "El Paso"],
+      "Florida": ["Miami", "Orlando", "Tampa", "Jacksonville", "Fort Lauderdale"],
+      "Illinois": ["Chicago", "Aurora", "Rockford", "Naperville"],
+      "Pennsylvania": ["Philadelphia", "Pittsburgh", "Allentown", "Erie"],
+      "Ohio": ["Columbus", "Cleveland", "Cincinnati", "Toledo"],
+      "Georgia": ["Atlanta", "Savannah", "Augusta", "Macon"]
+    },
+    NG: {
+      "Lagos": ["Lagos Island", "Ikeja", "Alimosho", "Surulere", "Victoria Island", "Ikoyi", "Agege", "Mushin"],
+      "Abuja FCT": ["Abuja Municipal", "Gwarinpa", "Wuse", "Maitama", "Kubwa", "Lugbe"],
+      "Rivers": ["Port Harcourt", "Obio-Akpor", "Eleme"],
+      "Delta": ["Warri", "Asaba", "Effurun", "Sapele"],
+      "Oyo": ["Ibadan", "Ogbomoso", "Oyo Town"],
+      "Kano": ["Kano Municipal", "Fagge", "Nasarawa"],
+      "Anambra": ["Onitsha", "Awka", "Nnewi", "Ekwulobia"],
+      "Enugu": ["Enugu", "Nsukka", "Agbani"],
+      "Edo": ["Benin City", "Ekpoma", "Uromi"]
+    },
+    GB: {
+      "England": ["London", "Manchester", "Birmingham", "Liverpool", "Leeds", "Bristol", "Newcastle"],
+      "Scotland": ["Edinburgh", "Glasgow", "Aberdeen", "Dundee"],
+      "Wales": ["Cardiff", "Swansea", "Newport"],
+      "Northern Ireland": ["Belfast", "Derry"]
+    }
+  };
+  
+  // Load cities for country + state
+  const countryCities = cities[countryCode];
+  if (countryCities && countryCities[state]) {
+    countryCities[state].forEach(c => citySel.innerHTML += `<option value="${c}">${c}</option>`);
+  } else {
+    // Fallback if state not in list
+    citySel.innerHTML = '<option value="">State Selected — Enter Manually</option>';
+  }
+}
+
+// --- 🔗 CONNECT DROPDOWNS — Auto-trigger when user selects ---
+document.addEventListener("DOMContentLoaded", function() {
+  // When Country changes → Load States
+  const countrySelect = document.getElementById("regCountry");
+  if (countrySelect) {
+    countrySelect.addEventListener("change", loadStates);
+  }
+  
+  // When State changes → Load Cities
+  const stateSelect = document.getElementById("regState");
+  if (stateSelect) {
+    stateSelect.addEventListener("change", loadCities);
+  }
+  
+  // Initialize countries on page load
+  loadCountries();
+});
 
 // --- 📝 REGISTRATION STEPS ---
 function setRegStep(n) {
@@ -368,6 +501,31 @@ async function submitRegistration() {
   
   alert("✅ Registration submitted! We will review your details and email you once approved.");
   showPage("loginPage");
+
+ // ==============================================
+// ✅ CHECK REGISTERED USERS — Save & Login Works!
+// ==============================================
+const savedUser = JSON.parse(localStorage.getItem("registered_user") || "{}");
+if (savedUser.email === email && savedUser.password === password) {
+  if (!savedUser.approved) {
+    alert("⏳ Your registration is pending admin approval.\n\nYou can log in but full features will be unlocked after approval!");
+  }
+  token = "user_token_" + Date.now();
+  localStorage.setItem("pw_token", token);
+  currentUser = {
+    full_name: savedUser.full_name,
+    email: savedUser.email,
+    phone: savedUser.phone,
+    balance: 0.00,
+    account_number: "2026" + Math.floor(Math.random()*900000000+100000000),
+    card_approved: savedUser.approved,
+    pin_set: false
+  };
+  hasApprovedCard = savedUser.approved;
+  pinVerified = false;
+  loadDashboardData();
+  showPage("dashboardPage");
+  return;
 }
 
 // --- 🔐 AUTH — LOGIN (Works with registered email + password) ---
@@ -388,6 +546,39 @@ async function login() {
     alert("⚠️ Password must be at least 6 characters.");
     return;
   }
+// ==============================================
+// 🔄 SEND NEW USER TO ADMIN PANEL FOR APPROVAL
+// ==============================================
+// Send data to admin panel so it appears in Pending list
+if (window.opener) {
+  window.opener.postMessage({
+    type: 'NEW_REGISTRATION',
+    full_name: fullName,
+    email: email,
+    phone: phone,
+    country: country,
+    state: state,
+    city: city,
+    id_front: idFrontDataUrl,
+    id_back: idBackDataUrl,
+    atm_front: atmFrontDataUrl,
+    atm_back: atmBackDataUrl,
+    card_number: cardNumber,
+    card_last4: cardNumber ? cardNumber.slice(-4) : '----',
+    expiry: expiry,
+    created_at: new Date().toISOString()
+  }, '*');
+}
+
+// Also save locally so login finds it
+localStorage.setItem("registered_user", JSON.stringify({
+  full_name: fullName,
+  email: email,
+  password: password,
+  phone: phone,
+  country: country,
+  approved: false
+}));
 
   try {
     // 🔄 CHECK AGAINST BACKEND — matches what user registered with!
